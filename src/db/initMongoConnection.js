@@ -1,18 +1,19 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import { env } from '../utils/env.js';
+import { envVars } from '../constants/envVars.js';
 
 export const initMongoConnection = async () => {
-  const mongoUri = `mongodb+srv://shobviponimali:j5uNXreAPXY4X4FW@cluster0.nzge2tq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+  const connectionLink = `mongodb+srv://${env(envVars.MONGODB_USER)}:${env(
+    envVars.MONGODB_PASSWORD,
+  )}@${env(envVars.MONGODB_URL)}/${env(
+    envVars.MONGODB_DB,
+  )}?retryWrites=true&w=majority&appName=Cluster0`;
+
   try {
-    await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(connectionLink);
     console.log('Mongo connection successfully established!');
   } catch (error) {
-    console.error('Mongo connection error:', error);
-    process.exit(1);
+    console.error(error.message);
+    throw error;
   }
 };

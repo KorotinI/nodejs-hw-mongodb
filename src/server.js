@@ -1,56 +1,79 @@
 import express from 'express';
-import cors from 'cors';
 import pino from 'pino-http';
+import cors from 'cors';
 import { env } from './utils/env.js';
-import { getContactById, getContacts } from './services/contacts.js';
+import { getAllContacts, getContactById } from './services/contacts.js';
+import { envVars } from './constants/envVars.js';
+import mongoose from 'mongoose';
 
-const PORT = Number(env('PORT', '3000'));
+const PORT = env(envVars.PORT, 3000);
+
 export const setupServer = () => {
   const app = express();
-  app.use(cors());
+
   app.use(
     pino({
       transport: {
         target: 'pino-pretty',
       },
-    })
+    }),
   );
 
-  app.use((req, res, next) => {
-    console.log(`Time:${new Date().toLocaleString()}`);
-    next();
-  });
-  app.get('/', (req, res) => {
-    res.json({ message: 'Hello World' });
-  });
+  app.use(cors());
+
   app.get('/contacts', async (req, res) => {
-    try {
-      const contacts = await getContacts();
-      res.status(200).json({ data: contacts, message: 'Successfully found contacts!' });
-    } catch (error) {
-      res.status(500).json({ message: 'Error fetching contacts', error: error.message });
-    }
+    const contacts = await getAllContacts();
+    res.json({
+      status: 200,
+      message: 'Successfully found contacts!',
+      data: contacts,
+    });
   });
-  app.get('/contacts/:id', async (req, res) => {
+
+  app.get('/contacts/:contactId', async (req, res, next) => {
     try {
-      console.log('request params', req.params);
-      const contact = await getContactById(req.params.id);
-      console.log('we manage to get contact', contact);
+      const id = req.params.contactId;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({
+          status: 400,
+          message: `Invalid contact ID: ${id}`,
+        });
+      }
+
+      const contact = await getContactById(id);
+
       if (!contact) {
         return res.status(404).json({
           status: 404,
-          message: `Contact with id ${req.params.id} not found`,
+          message: `Contact with id ${id} not found!`,
         });
       }
-      res
-        .status(200)
-        .json({ data: contact, message: `Successfully found contact with id ${req.params.id}` });
-    } catch (error) {
-      res.status(500).json({ message: 'Error fetching contact', error: error.message });
+
+      res.json({
+        status: 200,
+        message: 'Successfully found contacts!',
+        data: contact,
+      });
+    } catch (err) {
+      next(err);
     }
   });
-  app.use('*', (req, res, next) => {
-    res.status(404).json({ message: 'Not found' });
+
+  app.use('*', (req, res) => {
+    res.status(404).json({
+      message: 'Not found',
+    });
   });
-  app.listen(PORT, () => console.log(`Server started on ${PORT}`));
+
+  app.use((err, req, res, next) => {
+    res.status(500).json({
+      message: 'Something went wrong',
+      error: err.message,
+    });
+  });
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
 };
