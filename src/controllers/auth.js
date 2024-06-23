@@ -1,4 +1,4 @@
-import { THIRTY_DAYS } from '../constants/index.js';
+import { THIRTY_DAYS } from '../constants/envVars.js';
 import {
   loginUser,
   logoutUser,
