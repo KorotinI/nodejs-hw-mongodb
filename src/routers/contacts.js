@@ -13,7 +13,7 @@ import {
   createContactSchema,
   updateContactSchema,
 } from '../validation/contacts.js';
-import { validateMongoId } from '../middlewares/validateMongoId.js';
+import { validateMongoId } from '../middlewares/validateMongoID.js';
 import { authenticate } from '../middlewares/authenticate.js';
 
 const router = Router();
