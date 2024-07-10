@@ -9,7 +9,7 @@ import {
   SMTP,
   TEMPLATES_DIR,
   THIRTY_DAYS,
-} from '../constants/envVars.js';
+} from '../constants/index.js';
 import jwt from 'jsonwebtoken';
 import { env } from '../utils/env.js';
 import { sendEmail } from '../utils/sendEmail.js';
