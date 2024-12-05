@@ -1,7 +1,7 @@
 import createHttpError from 'http-errors';
 import { Contact } from '../db/models/contacts.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
-import { SORT_ORDER } from '../constants/envVars.js';
+import { SORT_ORDER } from '../constants/index.js';
 
 export const getAllContacts = async ({
   page = 1,
@@ -50,7 +50,7 @@ export const getContactById = async (id, userId) => {
   return await Contact.findOne({ _id: id, userId });
 };
 
-export const createContact = async (payload, userId) => {
+export const createContact = async ({ ...payload }, userId) => {
   const contactData = {
     ...payload,
     userId,
@@ -67,13 +67,18 @@ export const deleteContact = async (id, userId) => {
   return contact;
 };
 
-export const updateContact = async (id, payload, userId, options = {}) => {
+export const updateContact = async (
+  id,
+  { ...payload },
+  userId,
+  options = {},
+) => {
   const rawResult = await Contact.findOneAndUpdate(
     {
       _id: id,
       userId,
     },
-    payload,
+    { ...payload },
     {
       new: true,
       includeResultMetadata: true,
