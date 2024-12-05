@@ -50,9 +50,11 @@ export const getContactByIdController = async (req, res, next) => {
 
 export const createContactController = async (req, res) => {
   const userId = req.user._id;
-  const contact = await createContact(req.body, userId);
+  const { body, file } = req;
+  
+  const contact = await createContact({ ...body, photo: file }, userId);
 
-  res.json({
+  res.status(201).json({
     status: 201,
     message: 'Successfully created a contact!',
     data: contact,
@@ -76,8 +78,9 @@ export const deleteContactController = async (req, res, next) => {
 export const patchContactController = async (req, res) => {
   const id = req.params.contactId;
   const userId = req.user._id;
+  const { body, file } = req;
 
-  const result = await updateContact(id, req.body, userId);
+  const result = await updateContact(id, { ...body, photo: file }, userId);
 
   res.json({
     status: 200,
@@ -89,8 +92,9 @@ export const patchContactController = async (req, res) => {
 export const putContactController = async (req, res) => {
   const id = req.params.contactId;
   const userId = req.user._id;
+  const { body, file } = req;
 
-  const result = await updateContact(id, req.body, userId, {
+  const result = await updateContact(id, { ...body, photo: file }, userId, {
     upsert: true,
   });
 
